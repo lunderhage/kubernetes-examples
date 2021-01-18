@@ -83,8 +83,9 @@ Vagrant.configure("2") do |config|
   # SHELL
   (1..4).each do |i|
     config.vm.define "node-#{i}" do |node|
-      node.vm.network "private_network", ip: "192.168.100.#{i + 1}"
+      node.vm.network "public_network", bridge: "eno1", use_dhcp_assigned_default_route: true
       node.vm.hostname = "node-#{i}"
+      node.vm.provision "shell", path: "provision_kubelet_nodeip.sh"
     end
   end
 end
