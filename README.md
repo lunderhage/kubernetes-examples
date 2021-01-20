@@ -66,7 +66,7 @@ From now on, you can run all kubectl from your local machine.
 
 Now install flannel:
 ```bash
-$ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+$ kubectl apply -f kube-flannel.yml
 ```
 
 Now you are ready to add nodes to your cluster.
@@ -121,6 +121,61 @@ $ kubectl -n kube-system get secret
 ```
 
 Show your secret token by
+
 ```bash
 $ kubectl -n kube-system describe secret deployment-controller-token-vpjk6
+```
+
+## Setting up Ingress
+
+Install the ingress-nginx controller (our virtualbox machines counts as bare-metal):
+
+```bash
+$ kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.43.0/deploy/static/provider/baremetal/deploy.yaml
+```
+
+Then wait until the nginx controller is running.
+
+```bash
+$ kubectl get pods -n ingress-nginx \
+  -l app.kubernetes.io/name=ingress-nginx --watch
+```
+
+Then we need to create an ingress
+
+```bash
+$ kubectl apply -f ingress.yaml 
+```
+
+## Adding example services
+
+In the example-services directory are two examples services together with ingress.
+
+Install the services
+
+```bash
+$ kubecctl apply -f appple.yml
+$ kubectl apply -f banana.yml
+```
+
+Now install an ingress for these services
+```bash
+$ kubectl apply -f ingess.yml
+```
+
+Now you need to wait for the ingress to get an address...
+
+```bash
+$ kubectl get ingress --watch
+NAME                   CLASS   HOSTS   ADDRESS         PORTS   AGE
+apple-banana-ingress   nginx   *       192.168.10.84   80      20m
+```
+
+Now try to curl to the specified address:
+
+```bash
+$ curl http://192.168.10.84/apple
+apple
+$ curl http://192.168.10.84/banana
+banana
 ```
